@@ -1,0 +1,10 @@
+# Ambientes e segredos
+.env
+.env.password
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/

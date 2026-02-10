@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=${DB_HOST:-pgpool1.ebserh}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-powerbi}
+      - DB_USER=${DB_USER:-Abimael}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SCHEMA=${DB_SCHEMA:-gad_dlih_safs}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000"]
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    restart: unless-stopped
