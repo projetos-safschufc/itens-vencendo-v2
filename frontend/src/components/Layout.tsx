@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Analytics Inventário
+            Monitor de Validades e Perdas - SAFS CHUFC
           </Typography>
           {nav.map(({ to, label, adminOnly }) => {
             if (adminOnly && user?.role !== 'admin') return null

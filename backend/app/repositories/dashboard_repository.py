@@ -1,6 +1,10 @@
 """
 Repositório: estoque a vencer (v_df_estoque) – 180 dias, saldo > 0, filtros UACE/ULOG.
 Relacionamento: nome_do_material (parte antes do '-') = mat_cod_antigo (parte antes do '-').
+
+Regra de validade: na tela "ITENS A VENCER" exibimos somente materiais com validade >= data atual (TODAY),
+tanto no card "Próxima validade" quanto na tabela. Usamos date.today() para garantir consistência com
+o calendário (não exibir itens já vencidos).
 """
 from datetime import date, timedelta
 from typing import Any, List, Optional
@@ -9,7 +13,6 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.constants import ALL_WAREHOUSES, EXPIRY_WINDOW_DAYS, UACE_WAREHOUSES, ULOG_WAREHOUSES
-from app.utils.date_utils import business_today
 from app.core.logging_config import get_logger
 from app.repositories.base import execute_query, schema_prefix
 
@@ -21,10 +24,8 @@ STOCK_VIEW = "v_df_estoque"
 # Se sua view tiver coluna "grupo" ou "grupo_material", defina STOCK_HAS_GRUPO = True e use e.grupo nas queries
 STOCK_HAS_GRUPO = False
 
-# Condição de validade para a tabela e demais consultas: validade >= hoje e < (hoje + 180 dias).
-# Inclui itens que vencem hoje. ::date garante comparação por data (evita timezone).
+# Condição de validade: validade >= TODAY e < (TODAY + 180 dias). Usamos data do calendário (date.today()).
 VALIDADE_ITENS_A_VENCER = "(e.validade::date) >= :today AND (e.validade::date) < :expiry_end"
-# Para o card "Próxima validade": menor data em validade com validade >= hoje (até expiry_end).
 VALIDADE_PARA_CARD = "(e.validade::date) >= :today AND (e.validade::date) <= :expiry_end"
 
 
@@ -47,7 +48,7 @@ def get_filter_options(
 
     s = schema_prefix(STOCK_VIEW)
     wh_clause, wh_params = _warehouse_filter(sector, None)
-    today = business_today()
+    today = date.today()
     params: dict[str, Any] = {
         "today": today,
         "expiry_end": today + timedelta(days=EXPIRY_WINDOW_DAYS),
@@ -101,7 +102,7 @@ def get_stock_expiry(
     """
     s = schema_prefix(STOCK_VIEW)
     wh_clause, wh_params = _warehouse_filter(sector, warehouse)
-    today = business_today()
+    today = date.today()
     params: dict[str, Any] = {
         "today": today,
         "expiry_end": today + timedelta(days=EXPIRY_WINDOW_DAYS),
@@ -118,7 +119,7 @@ def get_stock_expiry(
         extra.append(" AND COALESCE(TRIM(e.grupo_de_material), 'Sem grupo') = :material_group")
         params["material_group"] = str(material_group).strip()
     if expiry_from:
-        effective_from = max(expiry_from, business_today())
+        effective_from = max(expiry_from, today)
         extra.append(" AND (e.validade::date) >= :expiry_from")
         params["expiry_from"] = effective_from
     if expiry_to:

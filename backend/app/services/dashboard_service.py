@@ -7,7 +7,6 @@ from typing import Any, Optional
 from sqlalchemy.orm import Session
 
 from app.repositories.dashboard_repository import get_stock_expiry
-from app.utils.date_utils import business_today
 from app.schemas.dashboard import (
     ChartSeries,
     DashboardCharts,
@@ -64,8 +63,8 @@ def get_stock_expiry_response(
         page=page,
         page_size=page_size,
     )
-    today = business_today()
-    # Remove da tabela qualquer item com validade menor que hoje (defensivo + alinha card à tabela)
+    today = date.today()
+    # Garante tabela e card só com validade >= TODAY (defensivo; repositório já filtra por date.today())
     filtered_rows = []
     for r in rows:
         exp = _to_date(r.get("expiry_date"))

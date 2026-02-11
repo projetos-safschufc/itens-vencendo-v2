@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { CircularProgress, Box } from '@mui/material'
+import { Routes, Route, Navigate, useLocation, Link as RouterLink } from 'react-router-dom'
+import { CircularProgress, Box, Typography, Link } from '@mui/material'
 import { useAuth } from './contexts/AuthContext'
 import { Layout } from './components/Layout'
 import { LoginPage } from './pages/LoginPage'
@@ -21,18 +21,41 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
+/** Rota pública: exibe o formulário de cadastro. Com login usa Layout; sem login, página standalone (como login). */
+function RegisterRoute() {
   const { user, loading } = useAuth()
-  const location = useLocation()
   if (loading)
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
       </Box>
     )
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
-  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
-  return <>{children}</>
+  if (user)
+    return (
+      <Layout>
+        <RegisterPage />
+      </Layout>
+    )
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+      }}
+    >
+      <Box sx={{ maxWidth: 520, width: '100%' }}>
+        <RegisterPage />
+        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+          <Link component={RouterLink} to="/login">
+            Já tem conta? Entrar
+          </Link>
+        </Typography>
+      </Box>
+    </Box>
+  )
 }
 
 export default function App() {
@@ -71,14 +94,7 @@ export default function App() {
           </PrivateRoute>
         }
       />
-      <Route
-        path="/register"
-        element={
-          <AdminRoute>
-            <Layout><RegisterPage /></Layout>
-          </AdminRoute>
-        }
-      />
+      <Route path="/register" element={<RegisterRoute />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

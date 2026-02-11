@@ -58,7 +58,7 @@ export function RegisterPage() {
         Cadastrar novo usuário
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Apenas administradores. O usuário será criado em ctrl.users (banco SAFS).
+        O usuário será criado em ctrl.users (banco SAFS).
       </Typography>
       <Card sx={{ maxWidth: 480 }}>
         <CardContent>

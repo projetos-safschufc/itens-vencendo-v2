@@ -19,7 +19,7 @@ from app.core.security import (
     verify_password,
 )
 from app.db.session import AuthSessionLocal
-from app.dependencies import AuthDbSession, CurrentUser, RequireAdmin
+from app.dependencies import AuthDbSession, CurrentUser
 from app.repositories.user_repository import (
     create_user,
     get_by_email,
@@ -155,8 +155,8 @@ def me(current_user: CurrentUser):
 
 
 @router.post("/register", response_model=UserMe)
-def register(body: RegisterRequest, auth_session: AuthDbSession, current_user: RequireAdmin):
-    """Cadastra novo usuário em ctrl.users. Apenas admin."""
+def register(body: RegisterRequest, auth_session: AuthDbSession):
+    """Cadastra novo usuário em ctrl.users. Formulário de cadastro pode ser exibido a qualquer usuário."""
     email = body.email.strip().lower()
     if not email or "@" not in email:
         raise ValidationError("E-mail inválido")

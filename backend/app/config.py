@@ -132,7 +132,7 @@ class Settings(BaseSettings):
         return out
 
     # App
-    app_name: str = "Inventory Analytics API"
+    app_name: str = "Monitor de Validades e Perdas - SAFS CHUFC API"
     debug: bool = False
     environment: str = "development"
 
@@ -187,7 +187,7 @@ class Settings(BaseSettings):
 
     @property
     def db_password_decoded(self) -> str:
-        """Senha do banco analytics (dw) pronta para connect_args. Decodifica %23 → #."""
+        """Senha do banco de dados (dw) pronta para connect_args. Decodifica %23 → #."""
         return self._decode_password(self.db_password)
 
     @property

@@ -72,6 +72,8 @@ Acesse **http://localhost:5173**. A API é chamada em `/api` (proxy em desenvolv
 
 ## Implantação em rede interna (ex.: 10.28.0.124)
 
+**Mini tutorial (VM):** para executar em uma máquina virtual e outros usuários acessarem, veja **[docs/TUTORIAL_VM.md](docs/TUTORIAL_VM.md)**.
+
 **Docker não é obrigatório.** Em rede interna você pode rodar backend e frontend diretamente no servidor (Windows ou Linux).
 
 ### Sem Docker (recomendado para rede interna)

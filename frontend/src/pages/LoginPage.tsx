@@ -28,10 +28,20 @@ export function LoginPage() {
   const from = (location.state as { from?: string } | null)?.from
 
   const getLoginErrorMessage = (err: unknown): string => {
-    if (!err || typeof err !== 'object' || !('response' in err)) {
+    if (!err || typeof err !== 'object') {
       return 'Não foi possível conectar ao servidor. Verifique sua conexão e se a API está em execução.'
     }
-    const res = (err as { response?: { data?: unknown; status?: number } }).response
+    const ax = err as { response?: { data?: unknown; status?: number }; code?: string; message?: string }
+    if (!('response' in ax) || ax.response == null) {
+      if (ax.code === 'ECONNABORTED') {
+        return 'A requisição demorou demais. Verifique sua conexão e tente novamente.'
+      }
+      if (ax.code === 'ERR_NETWORK' || (ax.message && String(ax.message).toLowerCase().includes('network'))) {
+        return 'Não foi possível conectar ao servidor. Verifique se a API está em execução e se o endereço está correto no .env (VITE_API_URL).'
+      }
+      return 'Não foi possível conectar ao servidor. Verifique sua conexão e se a API está em execução.'
+    }
+    const res = ax.response
     const data = res?.data
     const status = res?.status
     if (data && typeof data === 'object' && 'detail' in data) {
@@ -52,7 +62,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       const user = await login(username, password)
-      navigate(from === '/register' && user?.role === 'admin' ? '/register' : '/dashboard', { replace: true })
+      navigate(from === '/register' ? '/register' : '/dashboard', { replace: true })
     } catch (err: unknown) {
       setError(getLoginErrorMessage(err))
     } finally {
@@ -73,10 +83,10 @@ export function LoginPage() {
       <Card sx={{ maxWidth: 400, width: '100%' }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h5" gutterBottom align="center">
-            Analytics Inventário Hospitalar
+            Monitor de Validades e Perdas - SAFS CHUFC
           </Typography>
           <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
-            Faça login para acessar o dashboard
+            Faça login para acessar o monitor
           </Typography>
           {loading && (
             <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mb: 1 }}>
@@ -136,9 +146,6 @@ export function LoginPage() {
             <Link component={RouterLink} to="/register" state={{ from: '/register' }}>
               Cadastrar novo usuário
             </Link>
-            <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              (apenas administradores)
-            </Typography>
           </Typography>
         </CardContent>
       </Card>
