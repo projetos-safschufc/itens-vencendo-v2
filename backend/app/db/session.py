@@ -17,7 +17,7 @@ settings = get_settings()
 
 
 def _creator_analytics():
-    """Cria conexão ao powerbi com parâmetros explícitos; senha usada como string (DB_PASSWORD)."""
+    """Cria conexão ao banco de analytics (dw) com parâmetros explícitos; senha usada como string (DB_PASSWORD)."""
     return psycopg2.connect(
         host=settings.db_host,
         port=settings.db_port,
@@ -87,7 +87,7 @@ def check_auth_connection() -> tuple[bool, str]:
 
 def check_analytics_connection() -> tuple[bool, str]:
     """
-    Tenta uma conexão ao banco de analytics (powerbi). Retorna (sucesso, mensagem).
+    Tenta uma conexão ao banco de analytics (dw). Retorna (sucesso, mensagem).
     Útil para diagnóstico no startup sem expor a senha.
     """
     try:

@@ -11,7 +11,7 @@ Este guia descreve como publicar o **Analytics Inventário** no servidor Windows
 - **Frontend:** roda no servidor (Vite dev na porta 5173 ou build estático servido por IIS/nginx).
 - **Outros usuários:** acessam no navegador **http://10.28.0.124:5173** (ou a URL onde o frontend estiver exposto).
 
-Requisitos no servidor: Python 3.11+, Node.js 18+, rede até pgpool1.ebserh (PostgreSQL).
+Requisitos no servidor: Python 3.11+, Node.js 18+, rede até o host PostgreSQL (ex.: 10.28.0.159, configurado no .env).
 
 ---
 

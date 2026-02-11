@@ -39,7 +39,7 @@ pip install -e .   # ou: uv pip install -e .
 
 Variáveis principais no `.env`:
 
-- `DB_*` (powerbi – analytics) e `AUTH_DB_*` (safs – ctrl.users). Senhas com `#`: use aspas.
+- `DB_*` (banco dw – analytics) e `AUTH_DB_*` (safs – ctrl.users). Senhas com `#`: use aspas.
 - `JWT_SECRET_KEY` (obrigatório em produção)
 - `CORS_ORIGINS` (inclua a URL do frontend na rede, ex.: `http://10.28.0.124:5173`)
 

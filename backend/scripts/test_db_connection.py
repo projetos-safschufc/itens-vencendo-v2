@@ -1,5 +1,5 @@
 """
-Testa conexão ao banco powerbi com as credenciais do .env / .env.password.
+Testa conexão ao banco de analytics (dw) com as credenciais do .env / .env.password.
 Uso (a partir da pasta backend):
   python -m scripts.test_db_connection
   python -m scripts.test_db_connection "senha_para_testar"

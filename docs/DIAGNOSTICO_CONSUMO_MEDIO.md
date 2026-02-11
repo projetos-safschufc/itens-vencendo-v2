@@ -24,7 +24,7 @@
 ## Causas prováveis da não exibição (valores zerados)
 
 ### 1. **View de movimento em outro banco ou vazia**
-- A API usa **uma única sessão** (banco de analytics/powerbi). Estoque e consumo são lidos no **mesmo** banco.
+- A API usa **uma única sessão** (banco de analytics/dw). Estoque e consumo são lidos no **mesmo** banco.
 - Se `v_df_movimento` existir apenas no SAFS (ou em outro banco), no analytics a view pode não existir ou estar vazia → consumo zerado.
 - **O que fazer:** Confirmar se `gad_dlih_safs.v_df_movimento` existe no banco **analytics** (o mesmo de `v_df_estoque`) e se tem linhas na janela dos últimos 6 meses.
 

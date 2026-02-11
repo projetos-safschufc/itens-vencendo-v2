@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     # Diagnóstico: comprimento da senha usada na conexão (string DB_PASSWORD)
     pwd_len = len(settings.db_password_connection or "")
     logger.info("analytics_db_config", host=settings.db_host, db=settings.db_name, user=settings.db_user, db_password_len=pwd_len)
-    # Teste de conexão ao banco de analytics (powerbi) para diagnóstico no log
+    # Teste de conexão ao banco de analytics (dw) para diagnóstico no log
     loop = asyncio.get_running_loop()
     ok, msg = await loop.run_in_executor(None, check_analytics_connection)
     if ok:

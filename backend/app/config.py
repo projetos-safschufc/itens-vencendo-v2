@@ -136,17 +136,17 @@ class Settings(BaseSettings):
     debug: bool = False
     environment: str = "development"
 
-    # Database (analytics – powerbi)
+    # Database (analytics – dw)
     db_host: str = "localhost"
     db_port: int = 5432
-    db_name: str = "powerbi"
+    db_name: str = "dw"
     db_user: str = ""
     db_password: str = ""
     db_schema: str = "gad_dlih_safs"
 
     # Database auth (safs – ctrl.users)
     auth_db_host: str = "localhost"
-    auth_db_port: int = 5433
+    auth_db_port: int = 5432
     auth_db_name: str = "safs"
     auth_db_user: str = ""
     auth_db_password: str = ""
@@ -187,7 +187,7 @@ class Settings(BaseSettings):
 
     @property
     def db_password_decoded(self) -> str:
-        """Senha do banco analytics (powerbi) pronta para connect_args. Decodifica %23 → #."""
+        """Senha do banco analytics (dw) pronta para connect_args. Decodifica %23 → #."""
         return self._decode_password(self.db_password)
 
     @property

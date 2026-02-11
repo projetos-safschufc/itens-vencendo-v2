@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 def _handle_analytics_operational_error(e: OperationalError) -> None:
     logger.warning("analytics_db_connection_failed", error=str(e), exc_info=True)
     raise ServiceUnavailableError(
-        "Não foi possível conectar ao banco de analytics (powerbi). "
+        "Não foi possível conectar ao banco de analytics (dw). "
         "Verifique DB_HOST, DB_PORT, rede/VPN e .env. Detalhe no log do servidor."
     )
 

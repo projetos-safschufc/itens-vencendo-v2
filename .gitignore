@@ -1,0 +1,21 @@
+# Ambientes virtuais e segredos (raiz)
+.venv/
+venv/
+.env
+.env.password
+*.local
+
+# Artefatos de build e cache (evitar commit acidental ao adicionar da raiz)
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# IDE e OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

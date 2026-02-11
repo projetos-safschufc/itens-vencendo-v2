@@ -1,6 +1,6 @@
 # Como executar a aplicação – Passo a passo
 
-**Requisitos:** Python 3.11+, Node.js 18+ (com npm), acesso à rede do PostgreSQL (pgpool1.ebserh).
+**Requisitos:** Python 3.11+, Node.js 18+ (com npm), acesso à rede do PostgreSQL (host no .env, ex.: 10.28.0.159).
 
 **Pasta do projeto:** navegue até a raiz do projeto (ex.: `c:\...\app_validade`) antes de seguir os passos.
 
@@ -157,7 +157,7 @@ Acesse **http://localhost:5173** e faça login com o e-mail e senha de um usuár
 
 | Problema | O que fazer |
 |----------|-------------|
-| Erro de conexão com o banco | Verifique rede/VPN até pgpool1.ebserh e se `DB_PASSWORD` está **entre aspas** no `.env`. |
+| Erro de conexão com o banco | Verifique rede/VPN até o host do `.env` (ex.: 10.28.0.159) e se `DB_PASSWORD` está **entre aspas** no `.env`. |
 | CORS ao acessar por outro PC | No `.env` do backend, inclua a URL do frontend em `CORS_ORIGINS` (ex.: `"http://10.28.0.124:5173"`) e suba a API com `--host 0.0.0.0` ou `.\run.ps1 -BindHost "0.0.0.0"`. |
 | Porta 8000 ou 5173 em uso | Backend em outra porta: `python -m uvicorn app.main:app --reload --port 8001` (ou `.\run.ps1 -Port 8001`). No frontend, ajuste o proxy em `vite.config.ts` (target para `http://localhost:8001`). |
 | Login não aceita admin123 | Na pasta `backend`: `python scripts/hash_password.py`. Cole o hash gerado em `app/dependencies.py`, no campo `hashed_password` do usuário desejado. |

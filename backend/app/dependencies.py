@@ -16,7 +16,7 @@ from app.schemas.auth import Role, UserMe
 
 
 def get_db_session():
-    """Fornece sessão DB analytics (powerbi)."""
+    """Fornece sessão DB analytics (dw)."""
     yield from get_db_session_gen()
 
 
