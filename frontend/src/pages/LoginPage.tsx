@@ -61,7 +61,7 @@ export function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(username, password)
+      await login(username, password)
       navigate(from === '/register' ? '/register' : '/dashboard', { replace: true })
     } catch (err: unknown) {
       setError(getLoginErrorMessage(err))
