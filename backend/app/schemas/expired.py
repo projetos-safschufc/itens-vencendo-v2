@@ -23,9 +23,10 @@ class ExpiredFilterOptions(BaseModel):
 
 
 class ExpiredItemRow(BaseModel):
-    """Linha da tabela Detalhes dos Itens Vencidos (mapeamento regra de negócio)."""
+    """Linha da tabela Detalhes dos Itens Vencidos (mapeamento regra de negócio).
+    A coluna Material exibe v_df_movimento.mat_cod_antigo (material_name)."""
     material_code: Optional[str] = None
-    material_name: Optional[str] = None
+    material_name: Optional[str] = None  # mat_cod_antigo da v_df_movimento / df_movimento
     validity: Optional[date] = None  # data de vencimento/registro (mesano)
     quantity: float = 0
     unit_value: float = 0

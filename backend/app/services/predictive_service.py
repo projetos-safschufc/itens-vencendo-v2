@@ -147,6 +147,8 @@ def get_predictive_response(
     materials_with_no_consumption: set[str] = set()
     for r in stock_rows:
         material_code = (r.get("material_code") or "").strip()
+        # Coluna MATERIAL: v_df_estoque.nome_do_material_padronizado (ou nome_do_material se a view não tiver padronizado)
+        material_display = str(r.get("material_name") or r.get("material_code") or "").strip()
         consumption_6m = consumption_map.get(material_code, 0.0)
         # Mes/ano último consumo e Qtde último consumo: vêm só do último consumo real (get_last_consumption_by_material),
         # independentes do cálculo da média (avg_monthly_map / consumo 6 meses).
@@ -178,7 +180,7 @@ def get_predictive_response(
         data_dto.append(
             PredictiveRow(
                 material_code=material_code or r.get("material_name"),
-                material_name=r.get("material_name"),
+                material_name=material_display,
                 material_group=r.get("material_group"),
                 warehouse=r.get("warehouse"),
                 lote=r.get("lote"),

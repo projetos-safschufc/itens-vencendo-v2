@@ -25,7 +25,7 @@ RISCO_BAIXO = "BAIXO RISCO"
 class PredictiveRow(BaseModel):
     """Uma linha da tabela principal: um lote com cálculos de risco e perda."""
     material_code: Optional[str] = None
-    material_name: Optional[str] = None
+    material_name: Optional[str] = None  # v_df_estoque.nome_do_material_padronizado (prioridade) ou nome_do_material
     material_group: Optional[str] = None
     warehouse: Optional[str] = None
     lote: Optional[str] = None

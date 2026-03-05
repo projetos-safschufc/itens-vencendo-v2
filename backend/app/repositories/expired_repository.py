@@ -1,7 +1,9 @@
 """
 Repositório: histórico de itens vencidos (perdas por validade).
-Fonte: v_df_movimento (colunas data_movimento, quantidade, valor_unitario, almoxarifado, grupo)
-       ou fallback df_movimento (colunas mesano, qtde_orig, valor_orig, alm_nome, nm_grupo).
+Fonte: v_df_movimento (colunas data_movimento, quantidade, valor_unitario, almoxarifado, grupo, mat_cod_antigo)
+       ou fallback df_movimento (colunas mesano, qtde_orig, valor_orig, alm_nome, nm_grupo, mat_cod_antigo).
+Na coluna MATERIAL da tabela "Detalhes dos Itens Vencidos" são exibidos os dados de v_df_movimento.mat_cod_antigo
+(material_name na API); no fallback para df_movimento usa-se df_movimento.mat_cod_antigo.
 """
 from datetime import date
 from typing import Any, List, Optional
@@ -156,7 +158,8 @@ def _run_queries_view(
     val_expr: str = "(COALESCE(m.quantidade, 0) * COALESCE(m.valor_unitario, 0))::float",
     qty_cond: str = "COALESCE(m.quantidade, 0) > 0",
 ) -> tuple[List[dict] | None, int, dict, dict]:
-    """Executa queries usando colunas da view (data_movimento, quantidade, valor_unitario, almoxarifado, grupo)."""
+    """Executa queries usando colunas da view (data_movimento, quantidade, valor_unitario, almoxarifado, grupo, mat_cod_antigo)."""
+    # Coluna Material da tabela = v_df_movimento.mat_cod_antigo (material_name)
     sql = f"""
     SELECT
         SPLIT_PART(m.mat_cod_antigo::text, '-', 1) AS material_code,
@@ -280,7 +283,8 @@ def _run_queries_table(
     val_expr: str = "COALESCE(m.valor_orig, 0)::float",
     qty_cond: str = "COALESCE(m.qtde_orig, 0) > 0",
 ) -> tuple[List[dict], int, dict, dict]:
-    """Executa queries usando colunas da tabela df_movimento (mesano, qtde_orig, valor_orig, alm_nome, nm_grupo)."""
+    """Executa queries usando colunas da tabela df_movimento (mesano, qtde_orig, valor_orig, alm_nome, nm_grupo, mat_cod_antigo)."""
+    # Coluna Material da tabela = df_movimento.mat_cod_antigo (material_name)
     sql = f"""
     SELECT
         SPLIT_PART(m.mat_cod_antigo::text, '-', 1) AS material_code,

@@ -1,12 +1,11 @@
 """
 Repositório: análise preditiva (READ-ONLY).
 Base: v_df_estoque (estoque por lote, 180 dias) + consumo dos últimos 6 meses (mesma lógica da tela TESTE).
-Relacionamento estoque × movimento: v_df_estoque.nome_do_material = v_df_movimento.mat_cod_antigo (código
-  extraído pela parte antes do '-'). Tenta nome_do_material primeiro; fallback para nome_do_material_padronizado.
+Na coluna MATERIAL da tabela são exibidos os dados de v_df_estoque.nome_do_material_padronizado (prioridade),
+com fallback para nome_do_material quando a view não tiver a coluna padronizada.
+Relacionamento estoque × movimento (para consumo/média): código = parte antes do '-' em ambos.
 Consumo: get_teste_media_6m (v_df_movimento/df_movimento; RM, qtde>0, 6 meses anteriores ao mês atual).
-Consumo médio/mês: média = soma(consumo dos 6 últimos meses onde consumo > 0) / quantidade de mesano onde consumo > 0.
 Último consumo: get_last_consumption_by_material (last_mesano, qtde_ultimo_consumo por material).
-  Cálculo independente da média: considera todo o histórico e retorna o mês mais recente com consumo.
 Cada LOTE é uma unidade de análise. Cálculos de risco e perda na aplicação.
 """
 from datetime import date as date_type, timedelta
@@ -219,10 +218,10 @@ def _run_stock_query(
     material_search: Optional[str] = None,
 ) -> List[dict]:
     """
-    Executa a consulta de estoque. Tenta nome_do_material primeiro (relacionamento com mat_cod_antigo);
-    fallback para nome_do_material_padronizado. Retorna lista de linhas.
+    Executa a consulta de estoque. Prioriza nome_do_material_padronizado para a coluna MATERIAL (exibição);
+    fallback para nome_do_material se a view não tiver padronizado. material_code continua pela parte antes do '-'.
     """
-    for material_col in ("nome_do_material", "nome_do_material_padronizado"):
+    for material_col in ("nome_do_material_padronizado", "nome_do_material"):
         extra_sql = "".join(extra_stock_base)
         if material_search:
             extra_sql += f" AND (e.{material_col} ILIKE :mat_search OR SPLIT_PART(e.{material_col}::text, '-', 1) ILIKE :mat_search)"
@@ -294,12 +293,10 @@ def get_predictive_raw(
     """
     Dados brutos para a análise preditiva: estoque por lote, consumo e último consumo.
 
-    Consulta v_df_estoque (saldo > 0, validade na janela de 180 dias) com filtros opcionais por setor,
-    almoxarifado, grupo de material e busca por nome/código. Reutiliza get_teste_media_6m para consumo
-    dos últimos 6 meses e get_last_consumption_by_material para último mês/ano com consumo.
+    Consulta v_df_estoque (saldo > 0, validade na janela de 180 dias). A coluna MATERIAL da tabela
+    exibe v_df_estoque.nome_do_material_padronizado (prioridade) ou nome_do_material (fallback).
     Retorna: (lista de lotes; mapa material_code -> soma 6 meses; mapa last_consumption; mapa material_code -> média
-    últimos 6 meses). O último mapa é a mesma regra da coluna "Média últimos 6 meses" (soma/meses com consumo).
-    Cálculos de risco e perda ficam no serviço.
+    últimos 6 meses). Cálculos de risco e perda ficam no serviço.
     """
     s_stock = schema_prefix(STOCK_VIEW)
     wh_clause, wh_params = _warehouse_clause(sector, warehouse)

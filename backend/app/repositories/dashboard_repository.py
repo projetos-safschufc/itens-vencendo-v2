@@ -1,10 +1,8 @@
 """
 Repositório: estoque a vencer (v_df_estoque) – 180 dias, saldo > 0, filtros UACE/ULOG.
-Relacionamento: nome_do_material (parte antes do '-') = mat_cod_antigo (parte antes do '-').
-
-Regra de validade: na tela "ITENS A VENCER" exibimos somente materiais com validade >= data atual (TODAY),
-tanto no card "Próxima validade" quanto na tabela. Usamos date.today() para garantir consistência com
-o calendário (não exibir itens já vencidos).
+Na coluna MATERIAL da tabela são exibidos os dados de v_df_estoque.nome_do_material_padronizado (prioridade),
+com fallback para nome_do_material quando a view não tiver a coluna padronizada.
+Regra de validade: na tela "ITENS A VENCER" exibimos somente materiais com validade >= data atual (TODAY).
 """
 from datetime import date, timedelta
 from typing import Any, List, Optional
@@ -126,16 +124,23 @@ def get_stock_expiry(
         extra.append(" AND (e.validade::date) <= :expiry_to")
         params["expiry_to"] = expiry_to
     if material_search:
-        extra.append(" AND (e.nome_do_material ILIKE :mat_search OR SPLIT_PART(e.nome_do_material::text, '-', 1) ILIKE :mat_search)")
         params["mat_search"] = f"%{material_search}%"
-    extra_sql = "".join(extra)
 
-    # Query principal: material_group = e.grupo se a view tiver a coluna, senão NULL
+    def _extra_with_material_search(material_col: str) -> str:
+        base = "".join(extra)
+        if material_search:
+            base += f" AND (e.{material_col} ILIKE :mat_search OR SPLIT_PART(e.{material_col}::text, '-', 1) ILIKE :mat_search)"
+        return base
+
+    # Coluna MATERIAL: prioriza nome_do_material_padronizado; fallback para nome_do_material se a view não tiver padronizado
     grupo_expr = "e.grupo" if STOCK_HAS_GRUPO else "NULL::text"
-    sql = f"""
+    winning_material_col: Optional[str] = None
+    for material_col in ("nome_do_material_padronizado", "nome_do_material"):
+        extra_sql = _extra_with_material_search(material_col)
+        sql = f"""
     SELECT
-        SPLIT_PART(e.nome_do_material::text, '-', 1) AS material_code,
-        e.nome_do_material AS material_name,
+        TRIM(SPLIT_PART(e.{material_col}::text, '-', 1)) AS material_code,
+        e.{material_col} AS material_name,
         e.almoxarifado AS warehouse,
         CASE WHEN e.almoxarifado = ANY(:uace_warehouses) THEN 'UACE' WHEN e.almoxarifado = ANY(:ulog_warehouses) THEN 'ULOG' ELSE e.almoxarifado::text END AS sector,
         {grupo_expr} AS material_group,
@@ -151,29 +156,40 @@ def get_stock_expiry(
       {extra_sql}
     ORDER BY (e.validade::date) ASC, total_value DESC
     """
-    count_sql = f"""
+        count_sql = f"""
     SELECT COUNT(*) AS c FROM {s} e
     WHERE COALESCE(e.saldo, 0) > 0
       AND {VALIDADE_ITENS_A_VENCER}
       {wh_clause}
       {extra_sql}
     """
-    try:
-        total_result = execute_query(session, count_sql, params)
-        total_rows = int(total_result[0].get("c") or 0) if total_result else 0
-    except OperationalError:
-        raise
-    except Exception as e:
-        logger.warning("dashboard_count_failed", error=str(e), exc_info=True)
-        total_rows = 0
-    try:
-        offset = (page - 1) * page_size
-        rows = execute_query(session, sql + f" LIMIT {page_size} OFFSET {offset}", params)
-    except OperationalError:
-        raise
-    except Exception as e:
-        logger.warning("dashboard_rows_failed", error=str(e), exc_info=True)
+        try:
+            total_result = execute_query(session, count_sql, params)
+            total_rows = int(total_result[0].get("c") or 0) if total_result else 0
+        except OperationalError:
+            raise
+        except Exception as e:
+            logger.warning("dashboard_stock_query_failed", material_col=material_col, error=str(e))
+            session.rollback()
+            continue
+        try:
+            offset = (page - 1) * page_size
+            rows = execute_query(session, sql + f" LIMIT {page_size} OFFSET {offset}", params)
+        except OperationalError:
+            raise
+        except Exception as e:
+            logger.warning("dashboard_rows_failed", material_col=material_col, error=str(e), exc_info=True)
+            session.rollback()
+            rows = []
+            total_rows = 0
+        winning_material_col = material_col
+        break
+    else:
         rows = []
+        total_rows = 0
+
+    # extra_sql para métricas/card/gráficos (usa a mesma coluna de material que funcionou na query principal)
+    extra_sql = _extra_with_material_search(winning_material_col or "nome_do_material")
     # Métricas: total_value, items_count, distinct_warehouses
     metrics_sql = f"""
     SELECT
